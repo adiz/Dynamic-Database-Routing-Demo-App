@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/data/jpa
+        http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+    <bean id="detachableDB-dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="org.h2.Driver"/>
+        <property name="url" value="jdbc:h2:mem:testdb1;DB_CLOSE_DELAY=-1"/>
+        <property name="username" value="user1"/>
+        <property name="password" value="pass1"/>
+    </bean>
+
+    <bean id="persistentDB-dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="org.h2.Driver"/>
+        <property name="url" value="jdbc:h2:mem:testdb2;DB_CLOSE_DELAY=-1"/>
+        <property name="username" value="user2"/>
+        <property name="password" value="pass2"/>
+    </bean>
+
+    <bean id="dataSource" class="ro.adiz.ddr.configuration.CustomRoutingDataSource">
+        <property name="targetDataSources">
+            <map>
+                <entry key="DETACHABLE" value-ref="detachableDB-dataSource"/>
+                <entry key="PERSISTENT" value-ref="persistentDB-dataSource"/>
+            </map>
+        </property>
+        <property name="defaultTargetDataSource" ref="persistentDB-dataSource"/>
+    </bean>
+
+    <bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" depends-on="springLiquibase,customLiquibase">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
+        </property>
+        <property name="packagesToScan" value="ro.adiz.ddr.model"/>
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.H2Dialect</prop>
+                <prop key="hibernate.show_sql">true</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="emf"/>
+    </bean>
+
+    <jpa:repositories base-package="ro.adiz.ddr.dao"
+                      entity-manager-factory-ref="emf"
+                      transaction-manager-ref="transactionManager"/>
+
+    <bean id="springLiquibase" class="liquibase.integration.spring.SpringLiquibase">
+        <property name="dataSource" ref="persistentDB-dataSource"/>
+        <property name="changeLog" value="classpath:changelogs/db2/db-chlog.xml"/>
+    </bean>
+
+    <bean id="customLiquibase" class="ro.adiz.ddr.configuration.CustomLiquibase">
+        <property name="dataSource" ref="detachableDB-dataSource"/>
+        <property name="configChangeLog" value="classpath:changelogs/db1/db-create.xml"/>
+        <property name="cleanUpChangeLog" value="classpath:changelogs/db1/db-delete.xml"/>
+    </bean>
+
+</beans>
