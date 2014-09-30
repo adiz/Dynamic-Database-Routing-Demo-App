@@ -6,7 +6,7 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
 
-    <changeSet id="1" author="adiz">
+    <changeSet id="1" author="adiz" runAlways="true">
 
         <createTable tableName="appuser">
             <column autoIncrement="true" name="id" type="int">
@@ -22,19 +22,17 @@
                 <constraints nullable="false"/>
             </column>
             <column name="active" type="boolean" defaultValueBoolean="true"/>
-            <column name="userinfo_id" type="int"/>
         </createTable>
 
     </changeSet>
 
-    <changeSet id="2" author="adiz">
+    <changeSet id="2" author="adiz" runAlways="true">
 
         <insert tableName="appuser">
             <column name="username">detachable_usr</column>
             <column name="password">unknown</column>
             <column name="type">player</column>
             <column name="active" valueBoolean="true"/>
-            <column name="userinfo_id">1</column>
         </insert>
 
     </changeSet>
