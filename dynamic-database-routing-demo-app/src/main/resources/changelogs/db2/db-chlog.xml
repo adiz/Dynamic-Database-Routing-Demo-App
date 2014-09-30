@@ -22,7 +22,6 @@
                 <constraints nullable="false"/>
             </column>
             <column name="active" type="boolean" defaultValueBoolean="true"/>
-            <column name="userinfo_id" type="int"/>
         </createTable>
 
     </changeSet>
@@ -34,7 +33,6 @@
             <column name="password">unknown</column>
             <column name="type">player</column>
             <column name="active" valueBoolean="true"/>
-            <column name="userinfo_id">1</column>
         </insert>
 
     </changeSet>
